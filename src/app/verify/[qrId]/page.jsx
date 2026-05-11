@@ -43,23 +43,70 @@ function Stamp() {
         <ellipse cx="75" cy="52.5" rx="26" ry="38" />
 
         {/* Top arc — θ = −50°, −25°, 0°, +25°, +50° */}
-        <use href="#approved-star" x="52.3" y="24.1" transform="rotate(-48 52.3 24.1)" />
-        <use href="#approved-star" x="62.6" y="13.7" transform="rotate(-24 62.6 13.7)" />
+        <use
+          href="#approved-star"
+          x="52.3"
+          y="24.1"
+          transform="rotate(-48 52.3 24.1)"
+        />
+        <use
+          href="#approved-star"
+          x="62.6"
+          y="13.7"
+          transform="rotate(-24 62.6 13.7)"
+        />
         <use href="#approved-star" x="75" y="10" />
-        <use href="#approved-star" x="87.4" y="13.7" transform="rotate(24 87.4 13.7)" />
-        <use href="#approved-star" x="97.7" y="24.1" transform="rotate(48 97.7 24.1)" />
+        <use
+          href="#approved-star"
+          x="87.4"
+          y="13.7"
+          transform="rotate(24 87.4 13.7)"
+        />
+        <use
+          href="#approved-star"
+          x="97.7"
+          y="24.1"
+          transform="rotate(48 97.7 24.1)"
+        />
 
         {/* Bottom arc — symmetric, θ + 180° */}
-        <use href="#approved-star" x="52.3" y="80.9" transform="rotate(48 52.3 80.9)" />
-        <use href="#approved-star" x="62.6" y="91.3" transform="rotate(24 62.6 91.3)" />
-        <use href="#approved-star" x="75" y="95" transform="rotate(180 75 95)" />
-        <use href="#approved-star" x="87.4" y="91.3" transform="rotate(-24 87.4 91.3)" />
-        <use href="#approved-star" x="97.7" y="80.9" transform="rotate(-48 97.7 80.9)" />
+        <use
+          href="#approved-star"
+          x="52.3"
+          y="80.9"
+          transform="rotate(48 52.3 80.9)"
+        />
+        <use
+          href="#approved-star"
+          x="62.6"
+          y="91.3"
+          transform="rotate(24 62.6 91.3)"
+        />
+        <use
+          href="#approved-star"
+          x="75"
+          y="95"
+          transform="rotate(180 75 95)"
+        />
+        <use
+          href="#approved-star"
+          x="87.4"
+          y="91.3"
+          transform="rotate(-24 87.4 91.3)"
+        />
+        <use
+          href="#approved-star"
+          x="97.7"
+          y="80.9"
+          transform="rotate(-48 97.7 80.9)"
+        />
       </g>
 
       <g className="verify-stamp-banner" transform="rotate(-13 75 52.5)">
         <rect x="19" y="37.5" width="112" height="30" rx="6" ry="6" />
-        <text x="75" y="53.4" textAnchor="middle">APPROVED</text>
+        <text x="75" y="53.4" textAnchor="middle">
+          APPROVED
+        </text>
       </g>
     </svg>
   );
@@ -125,11 +172,26 @@ export default function VerifyPage() {
     return `${pad(hours)}:${pad(date.getMinutes())} ${period}`;
   };
 
+  // NEW HELPER: Calculate the floored hours difference between two dates
+  const calculateValidHours = (fromDateStr, uptoDateStr) => {
+    const fromDate = getDate(fromDateStr);
+    const uptoDate = getDate(uptoDateStr);
+
+    if (!fromDate || !uptoDate) return 5; // Default fallback if dates are missing
+
+    const diffMs = uptoDate.getTime() - fromDate.getTime();
+    if (diffMs <= 0) return 0; // Prevent negative hours if dates are reversed
+
+    return Math.floor(diffMs / (1000 * 60 * 60));
+  };
+
   const value = (field, fallback = PLACEHOLDER) => field || fallback;
   const rupees = (field) => (field ? `Rs.${field}` : "Rs.");
-  const qtyWithMt = (quantity) => (quantity ? `${quantity} (in MT)` : PLACEHOLDER);
+  const qtyWithMt = (quantity) => (quantity ? `${quantity}` : PLACEHOLDER);
   const sellerAndLocation = (dispatchInfo) =>
-    [dispatchInfo.seller_name, dispatchInfo.seller_location].filter(Boolean).join(" ");
+    [dispatchInfo.seller_name, dispatchInfo.seller_location]
+      .filter(Boolean)
+      .join(" ");
   const sellerWithMs = (dispatchInfo) => {
     const name = sellerAndLocation(dispatchInfo);
     if (!name) return PLACEHOLDER;
@@ -155,12 +217,18 @@ export default function VerifyPage() {
       </div>
     );
   }
-
+  console.log(data)
   const { is_expired, ...dispatchInfo } = data;
   const qrValue = verificationUrl || `/verify/${qrId}`;
   const mineralText = dispatchInfo.quantity
     ? `${dispatchInfo.product_name} (${dispatchInfo.quantity} MT)`
     : dispatchInfo.product_name || "";
+
+  // Calculate the valid hours
+  const validHours = calculateValidHours(
+    dispatchInfo.valid_from,
+    dispatchInfo.valid_upto,
+  );
 
   return (
     <>
@@ -669,17 +737,22 @@ export default function VerifyPage() {
         `}
       </style>
 
-      <main className={`verify-page ${is_expired ? "verify-expired" : "verify-active"}`}>
+      <main
+        className={`verify-page ${is_expired ? "verify-expired" : "verify-active"}`}
+      >
         <div className="verify-sheet">
           <section className="verify-note" aria-label="Verification note">
             <p className="verify-note-english">
-              <strong>Note:</strong> The Information mentioned in e-Challan, Such as (Validity and Vehicle No.) should be
-              matched with the information mentioned in the https://geologymining.jk.gov.in/ which can be seen after
-              scanning the QR code encrypted on e-Challan.
+              <strong>Note:</strong> The Information mentioned in e-Challan,
+              Such as (Validity and Vehicle No.) should be matched with the
+              information mentioned in the https://geologymining.jk.gov.in/
+              which can be seen after scanning the QR code encrypted on
+              e-Challan.
             </p>
             <p className="verify-note-hindi">
-              <strong>सूचना:</strong> ई-चालान में उल्लिखित जानकारी, जैसे (वैधता और वाहन संख्या आदि) का मिलान
-              https://geologymining.jk.gov.in/ में उल्लिखित जानकारी से किया जाना चाहिए, जिसे ई-चालान पर छपे क्यूआर
+              <strong>सूचना:</strong> ई-चालान में उल्लिखित जानकारी, जैसे (वैधता
+              और वाहन संख्या आदि) का मिलान https://geologymining.jk.gov.in/ में
+              उल्लिखित जानकारी से किया जाना चाहिए, जिसे ई-चालान पर छपे क्यूआर
               कोड को स्कैन करने के बाद देखा जा सकता है।
             </p>
           </section>
@@ -689,13 +762,21 @@ export default function VerifyPage() {
           {is_expired ? (
             <section className="verify-expired-panel">
               <div className="verify-center">
-                <img src={LOGO_URL} alt="Department of Geology and Mining" className="verify-logo" />
+                <img
+                  src={LOGO_URL}
+                  alt="Department of Geology and Mining"
+                  className="verify-logo"
+                />
                 <h1 className="verify-expired-title">e-Challan expired.</h1>
-                <p className="verify-expired-hi">ईचालान की अवधि समाप्त हो गई है।</p>
+                <p className="verify-expired-hi">
+                  ईचालान की अवधि समाप्त हो गई है।
+                </p>
                 <p className="verify-expired-url">
                   URL: <span>{SITE_URL}</span>
                 </p>
-                <p className="verify-expired-challan">Challan No. : {dispatchInfo.qr_id}</p>
+                <p className="verify-expired-challan">
+                  Challan No. : {dispatchInfo.qr_id}
+                </p>
               </div>
 
               <table className="verify-expired-table">
@@ -703,22 +784,33 @@ export default function VerifyPage() {
                   <tr>
                     <th>Name &amp; Location of Seller</th>
                     <td>
-                      <span className="verify-highlight">{sellerWithMs(dispatchInfo)}</span>
+                      <span className="verify-highlight">
+                        {sellerWithMs(dispatchInfo)}
+                      </span>
                     </td>
                   </tr>
                   <tr>
                     <th>Validity</th>
                     <td>
                       <span className="verify-highlight ">
-                        <span className="text-white">Date </span>({formatDate(dispatchInfo.valid_from)} to {formatDate(dispatchInfo.valid_upto)}) <span className="text-white">Time</span> (
-                        {formatOnlyTime(dispatchInfo.valid_from)} to {formatOnlyTime(dispatchInfo.valid_upto)})
+                        <span className="text-white">Date </span>(
+                        {formatDate(dispatchInfo.valid_from)} to{" "}
+                        {formatDate(dispatchInfo.valid_upto)}){" "}
+                        <span className="text-white">Time</span> (
+                        {formatOnlyTime(dispatchInfo.valid_from)} to{" "}
+                        {formatOnlyTime(dispatchInfo.valid_upto)})
                       </span>
                     </td>
                   </tr>
                   <tr>
                     <th>Route of the Transportation</th>
                     <td>
-                      Source <u className="font-bold">{dispatchInfo.route_source}</u> Destination <u className="font-bold">{dispatchInfo.route_destination}</u>
+                      Source{" "}
+                      <u className="font-bold">{dispatchInfo.route_source}</u>{" "}
+                      Destination{" "}
+                      <u className="font-bold">
+                        {dispatchInfo.route_destination}
+                      </u>
                     </td>
                   </tr>
                   <tr>
@@ -741,97 +833,151 @@ export default function VerifyPage() {
           ) : (
             <>
               <section className="verify-center">
-                <img src={LOGO_URL} alt="Department of Geology and Mining" className="verify-logo" />
-                <h1 className="verify-title">Government of Jammu &amp; Kashmir</h1>
-                <h2 className="verify-subtitle">Department of Geology &amp; Mining</h2>
+                <img
+                  src={LOGO_URL}
+                  alt="Department of Geology and Mining"
+                  className="verify-logo"
+                />
+                <h1 className="verify-title">
+                  Government of Jammu &amp; Kashmir
+                </h1>
+                <h2 className="verify-subtitle">
+                  Department of Geology &amp; Mining
+                </h2>
                 <p className="verify-form">FORM 'A'</p>
-                <p className="verify-rule">[See Rule 38(5), 50(12), 60(1)(v), 70, 71]</p>
-                <p className="verify-desc">of challan for dispatch of mineral and its products</p>
+                <p className="verify-rule">
+                  [See Rule 38(5), 50(12), 60(1)(v), 70, 71]
+                </p>
+                <p className="verify-desc">
+                  of challan for dispatch of mineral and its products
+                </p>
                 <p className="verify-echallan">E-CHALLAN</p>
 
                 <p className="verify-active-challan">
-                 <span className="font-bold">Challan No.:</span> <span className="verify-highlight font-bold">{dispatchInfo.qr_id}</span>
-                </p> 
+                  <span className="font-bold">Challan No.:</span>{" "}
+                  <span className="verify-highlight font-bold">
+                    {dispatchInfo.qr_id}
+                  </span>
+                </p>
 
                 <div className="verify-qr-wrap">
-                  <QRCodeCanvas value={qrValue} size={80} fgColor="#8d21cc" bgColor="#ffffff" includeMargin={false} />
+                  <QRCodeCanvas
+                    value={qrValue}
+                    size={80}
+                    fgColor="#8d21cc"
+                    bgColor="#ffffff"
+                    includeMargin={false}
+                  />
                   <p className="verify-qr-label font-bold">(QR-Code)</p>
                 </div>
 
                 <p className="verify-mineral">
-                  Mineral : {dispatchInfo.product_name} ({dispatchInfo.quantity} MT)
+                  Mineral : {dispatchInfo.product_name} ({dispatchInfo.quantity}{" "}
+                  MT)
                 </p>
                 <p className="verify-validity">
-                  Validity from {formatDateTime(dispatchInfo.valid_from)} to {formatDateTime(dispatchInfo.valid_upto)}
+                  Validity from {formatDateTime(dispatchInfo.valid_from)} to{" "}
+                  {formatDateTime(dispatchInfo.valid_upto)}
                 </p>
                 <p className="verify-validity-hi">
-                  वैधता {formatDateTime(dispatchInfo.valid_from)} से {formatDateTime(dispatchInfo.valid_upto)} तक
+                  वैधता {formatDateTime(dispatchInfo.valid_from)} से{" "}
+                  {formatDateTime(dispatchInfo.valid_upto)} तक
                 </p>
                 <p className="verify-url">
                   URL: <a href={SITE_URL}>{SITE_URL}</a>
                 </p>
               </section>
 
-              <section className="verify-detail-table" aria-label="Active challan details">
+              <section
+                className="verify-detail-table"
+                aria-label="Active challan details"
+              >
                 <DetailRow number="1">
                   Type of mineral concessions Lease / License / Permit no.{" "}
                   <b>{value(dispatchInfo.concession_type_no)}</b>
                   <br />
-                  Issuing date <b>{formatDate(dispatchInfo.valid_from)}</b> Valid upto{" "}
-                  <b>{formatDate(dispatchInfo.valid_upto)}</b>
+                  Issuing date <b>{formatDate(dispatchInfo.valid_from)}</b>{" "}
+                  Valid upto <b>{formatDate(dispatchInfo.valid_upto)}</b>
                 </DetailRow>
                 <DetailRow number="2" tone="light">
-                  Name &amp; Style of Concessionary {value("", PLACEHOLDER)}
+                  Name &amp; Style of Concessionary{" "}
+                  {value(dispatchInfo.seller_name, PLACEHOLDER)}
                 </DetailRow>
                 <DetailRow number="3">
-                  Location of mineral concession area {value("", PLACEHOLDER)}
+                  Location of mineral concession area{" "}
+                  {value(dispatchInfo.seller_location, PLACEHOLDER)}
                 </DetailRow>
                 <DetailRow number="4" tone="light">
-                  Type of mineral Granted on mineral concessions {value("", PLACEHOLDER)}
+                  Type of mineral Granted on mineral concessions{" "}
+                  {value(dispatchInfo.product_name, PLACEHOLDER)}
                 </DetailRow>
                 <DetailRow number="5">
-                  Quantity of mineral granted on mineral Concessions {value(dispatchInfo.mineral_granted_qty)}
+                  Quantity of mineral granted on mineral Concessions{" "}
+                  {value(dispatchInfo.mineral_granted_qty, PLACEHOLDER)}
                 </DetailRow>
                 <DetailRow number="6" tone="light">
-                  Name &amp; Location of Stone crusher Unit and Holder <b>{sellerWithMs(dispatchInfo)}</b>
+                  Name &amp; Location of Stone crusher Unit and Holder{" "}
+                  <b>{sellerWithMs(dispatchInfo)}</b>
                 </DetailRow>
                 <DetailRow number="7">
-                  Type of Finished Products : Sand/Bajri/Kankra (Aggregate)/Dust etc.{" "}
-                  <b>{value(dispatchInfo.product_name, "")}</b>
+                  Type of Finished Products : Sand/Bajri/Kankra (Aggregate)/Dust
+                  etc. <b>{value(dispatchInfo.product_name, "")}</b>
                 </DetailRow>
                 <DetailRow number="8" tone="light">
-                  Quantity of mineral dispatched {qtyWithMt(dispatchInfo.quantity)}
+                  Quantity of mineral dispatched{" "}
+                  <span className="font-bold underline">
+                    {qtyWithMt(dispatchInfo.quantity)}
+                  </span>{" "}
+                  (in MT)
                 </DetailRow>
+                {/* INJECTED DYNAMIC HOURS HERE */}
                 <DetailRow number="9">
-                  Date &amp; Time of dispatch <b>{formatDateTime(dispatchInfo.valid_from)} (Valid upto 5 Hours)</b>
+                  Date &amp; Time of dispatch{" "}
+                  <b>{formatDateTime(dispatchInfo.valid_from)}</b>{" "}
+                  <span style={{ fontWeight: 600 }}>
+                    (Valid upto {validHours} Hours)
+                  </span>
                 </DetailRow>
                 <DetailRow number="10" tone="light">
-                  Route of the Transportation- Source <b>{dispatchInfo.route_source}</b> Destination{" "}
+                  Route of the Transportation- Source{" "}
+                  <b>{dispatchInfo.route_source}</b> Destination{" "}
                   <b>{dispatchInfo.route_destination}</b>
                 </DetailRow>
                 <DetailRow number="11">
-                  Rate of Mineral <b>{rupees(dispatchInfo.mineral_rate)}</b> Total Amount (Excluding GST and
-                  Transportation charges) <b>{rupees(dispatchInfo.total_amount)}</b>
+                  Rate of Mineral <b>{rupees(dispatchInfo.mineral_rate)}</b>{" "}
+                  Total Amount (Excluding GST and Transportation charges){" "}
+                  <b>{rupees(dispatchInfo.total_amount)}</b>
                 </DetailRow>
                 <DetailRow number="12" tone="light">
-                  GST Bill/No. <b>{dispatchInfo.gst_no || "NA"}</b> Quantity <b>{value(dispatchInfo.gst_qty, "")}</b>{" "}
-                  Amount <b>{rupees(dispatchInfo.gst_amount)}</b> (Enclose copy of GST Invoice)
+                  GST Bill/No. <b>{dispatchInfo.gst_no || "NA"}</b> Quantity{" "}
+                  <b>{value(dispatchInfo.gst_qty, "")}</b> Amount{" "}
+                  <b>{rupees(dispatchInfo.gst_amount)}</b> (Enclose copy of GST
+                  Invoice)
                 </DetailRow>
                 <DetailRow number="13">
                   Vehicle No. <b>{dispatchInfo.vehicle_no?.toUpperCase()}</b>
                 </DetailRow>
                 <DetailRow number="14" tone="light">
-                  Name &amp; Address of Consignee / Buyer / Purchaser <b>{dispatchInfo.consignee_details}</b>
+                  Name &amp; Address of Consignee / Buyer / Purchaser{" "}
+                  <b>{dispatchInfo.consignee_details}</b>
                 </DetailRow>
                 <DetailRow number="15">
-                  Name &amp; Phone No. of Driver <b>{dispatchInfo.driver_details}</b>
+                  Name &amp; Phone No. of Driver{" "}
+                  <b>{dispatchInfo.driver_details}</b>
                 </DetailRow>
               </section>
 
               <section className="verify-signature" aria-label="Approval stamp">
-                <div className="verify-signature-title">Self Approved by Mineral Concessionary</div>
+                <div className="verify-signature-title">
+                  Self Approved by Mineral Concessionary
+                </div>
                 <div className="verify-signature-body flex items-center justify-center ">
-                  <img src="https://geologymining.jk.gov.in//images/home/approveddd.png" alt="" width={120} height={120}/>
+                  <img
+                    src="https://geologymining.jk.gov.in//images/home/approveddd.png"
+                    alt=""
+                    width={120}
+                    height={120}
+                  />
                 </div>
               </section>
             </>
