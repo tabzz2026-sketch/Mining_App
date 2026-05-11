@@ -2,6 +2,7 @@
 
 import { db } from '@/db'; 
 import { dispatches } from '@/db/schema';
+import { parseChallanInputDate } from '@/lib/challanDate';
 
 // Helper to generate the custom challan format based on District Code
 const generateChallanNo = (districtCode) => {
@@ -18,12 +19,16 @@ const generateChallanNo = (districtCode) => {
 export async function createDispatchAction(formData) {
   try {
     // 1. Basic validation
-    if (!formData.valid_from) {
-      return { success: false, error: "Valid from time is required" };
+    if (!formData.valid_from || !formData.valid_upto) {
+      return { success: false, error: "Validity time is required" };
     }
 
-    const validFromDate = new Date(formData.valid_from);
-    const validUptoDate = new Date(formData.valid_upto);
+    const validFromDate = parseChallanInputDate(formData.valid_from);
+    const validUptoDate = parseChallanInputDate(formData.valid_upto);
+
+    if (!validFromDate || !validUptoDate) {
+      return { success: false, error: "Invalid validity time" };
+    }
 
     // 3. Assemble the secure payload
     const payload = {

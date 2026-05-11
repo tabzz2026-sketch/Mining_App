@@ -2,6 +2,7 @@
 
 import { db } from '@/db';
 import { dispatches } from '@/db/schema';
+import { getChallanDate } from '@/lib/challanDate';
 import { eq } from 'drizzle-orm';
 
 export async function verifyDispatchAction(qrId) {
@@ -15,7 +16,8 @@ export async function verifyDispatchAction(qrId) {
       return { success: false, error: 'Invalid or Unrecognized QR Code' };
     }
 
-    const is_expired = new Date() > new Date(record.valid_upto);
+    const validUptoDate = getChallanDate(record.valid_upto);
+    const is_expired = !validUptoDate || Date.now() > validUptoDate.getTime();
     
     return { 
       success: true, 

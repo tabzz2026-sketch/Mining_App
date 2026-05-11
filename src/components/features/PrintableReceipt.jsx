@@ -3,6 +3,11 @@
 import React from "react";
 import { ArrowLeft, Printer } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
+import {
+  calculateChallanValidHours as calculateValidHours,
+  formatChallanDate as formatDate,
+  formatChallanDateTime as formatDateTime,
+} from "@/lib/challanDate";
 
 const PLACEHOLDER = ".................................";
 const WATERMARK_ITEMS = Array.from({ length: 96 });
@@ -23,43 +28,6 @@ export default function PrintableReceipt({ dispatchData, qrId, onBack }) {
   React.useEffect(() => {
     setVerificationUrl(`${window.location.origin}/verify/${qrId || ""}`);
   }, [qrId]);
-
-  const pad = (value) => String(value).padStart(2, "0");
-
-  const getDate = (dateString) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? null : date;
-  };
-
-  const formatDate = (dateString) => {
-    const date = getDate(dateString);
-    if (!date) return "";
-    return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()}`;
-  };
-
-  const formatDateTime = (dateString) => {
-    const date = getDate(dateString);
-    if (!date) return "";
-
-    const hours = date.getHours(); // 24-hour format
-    const period = hours >= 12 ? "PM" : "AM"; 
-
-    return `${formatDate(dateString)} ${pad(hours)}:${pad(date.getMinutes())} ${period}`;
-  };
-
-  // NEW HELPER: Calculate the floored hours difference between two dates
-  const calculateValidHours = (fromDateStr, uptoDateStr) => {
-    const fromDate = getDate(fromDateStr);
-    const uptoDate = getDate(uptoDateStr);
-    
-    if (!fromDate || !uptoDate) return 5; // Default fallback if dates are missing
-
-    const diffMs = uptoDate.getTime() - fromDate.getTime();
-    if (diffMs <= 0) return 0; // Prevent negative hours if dates are reversed
-
-    return Math.floor(diffMs / (1000 * 60 * 60));
-  };
 
   const value = (field, fallback = PLACEHOLDER) => field || fallback;
   const rupees = (field) => (field ? `Rs.${field}` : "Rs.");

@@ -4,6 +4,12 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 import { verifyDispatchAction } from "@/actions/verify.action";
+import {
+  calculateChallanValidHours as calculateValidHours,
+  formatChallanDate as formatDate,
+  formatChallanDateTime as formatDateTime,
+  formatChallanTime as formatOnlyTime,
+} from "@/lib/challanDate";
 
 const SITE_URL = "https://geologymining.jk.gov.in/";
 const LOGO_URL = "https://geologymining.jk.gov.in/images/home/logo.png";
@@ -141,49 +147,6 @@ export default function VerifyPage() {
       fetchDispatchInfo();
     }
   }, [qrId]);
-
-  const pad = (value) => String(value).padStart(2, "0");
-
-  const getDate = (dateString) => {
-    if (!dateString) return null;
-    const date = new Date(dateString);
-    return Number.isNaN(date.getTime()) ? null : date;
-  };
-
-  const formatDate = (dateString) => {
-    const date = getDate(dateString);
-    if (!date) return "";
-    return `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${date.getFullYear()}`;
-  };
-
-  const formatDateTime = (dateString) => {
-    const date = getDate(dateString);
-    if (!date) return "";
-    const hours = date.getHours();
-    const period = hours >= 12 ? "PM" : "AM";
-    return `${formatDate(dateString)} ${pad(hours)}:${pad(date.getMinutes())} ${period}`;
-  };
-
-  const formatOnlyTime = (dateString) => {
-    const date = getDate(dateString);
-    if (!date) return "";
-    const hours = date.getHours();
-    const period = hours >= 12 ? "PM" : "AM";
-    return `${pad(hours)}:${pad(date.getMinutes())} ${period}`;
-  };
-
-  // NEW HELPER: Calculate the floored hours difference between two dates
-  const calculateValidHours = (fromDateStr, uptoDateStr) => {
-    const fromDate = getDate(fromDateStr);
-    const uptoDate = getDate(uptoDateStr);
-
-    if (!fromDate || !uptoDate) return 5; // Default fallback if dates are missing
-
-    const diffMs = uptoDate.getTime() - fromDate.getTime();
-    if (diffMs <= 0) return 0; // Prevent negative hours if dates are reversed
-
-    return Math.floor(diffMs / (1000 * 60 * 60));
-  };
 
   const value = (field, fallback = PLACEHOLDER) => field || fallback;
   const rupees = (field) => (field ? `Rs.${field}` : "Rs.");
