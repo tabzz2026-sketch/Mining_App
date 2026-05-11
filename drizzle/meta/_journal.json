@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1778491714045,
+      "tag": "0000_handy_nuke",
+      "breakpoints": true
+    }
+  ]
+}
