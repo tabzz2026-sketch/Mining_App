@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  /* This tells Tailwind to use the font variable we set in layout.jsx */
+  --font-sans: 'Montserrat', sans-serif;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.05)];
+  }
+  .glass-input {
+    @apply bg-white/50 border border-white/50 focus:bg-white/80 focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all outline-none;
+  }
+}
+
+/* Ambient Background Animations */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
